@@ -13,6 +13,7 @@ import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { TasksPage } from '@/pages/TasksPage'
+import { CalendarPage } from '@/pages/CalendarPage'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -23,6 +24,11 @@ const router = createBrowserRouter([
   {
     path: "/tasks",
     element: <TasksPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/calendar",
+    element: <CalendarPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);

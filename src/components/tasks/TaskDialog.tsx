@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useTaskStore } from '@/lib/store';
+import { useTaskStore, Task } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
@@ -31,9 +31,12 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 interface TaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  task?: Task | null;
 }
-export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
+export function TaskDialog({ open, onOpenChange, task }: TaskDialogProps) {
   const addTask = useTaskStore((s) => s.addTask);
+  const updateTask = useTaskStore((s) => s.updateTask);
+  const subjects = useTaskStore((s) => s.subjects);
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -43,19 +46,39 @@ export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
       dueDate: new Date().toISOString().split('T')[0],
     },
   });
+  useEffect(() => {
+    if (task) {
+      form.reset({
+        title: task.title,
+        subject: task.subject,
+        priority: task.priority,
+        dueDate: task.dueDate,
+      });
+    } else if (open) {
+      form.reset({
+        title: '',
+        subject: subjects[0] || '',
+        priority: 'medium',
+        dueDate: new Date().toISOString().split('T')[0],
+      });
+    }
+  }, [task, open, form, subjects]);
   const onSubmit = (values: TaskFormValues) => {
-    addTask({
-      ...values,
-      status: 'todo',
-    });
-    form.reset();
+    if (task) {
+      updateTask(task.id, values);
+    } else {
+      addTask({
+        ...values,
+        status: 'todo',
+      });
+    }
     onOpenChange(false);
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>{task ? 'Edit Task' : 'Add New Task'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -66,7 +89,7 @@ export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Finish Math Homework" {...field} />
+                    <Input placeholder="e.g., Biology Lab Report" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,9 +102,18 @@ export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Mathematics" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select subject" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subjects.map(s => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -92,7 +124,7 @@ export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select priority" />
@@ -124,7 +156,7 @@ export function TaskDialog({ open, onOpenChange }: TaskDialogProps) {
             />
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit">Create Task</Button>
+              <Button type="submit">{task ? 'Save Changes' : 'Create Task'}</Button>
             </DialogFooter>
           </form>
         </Form>
