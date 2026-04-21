@@ -1,6 +1,6 @@
 # StudyMinder
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/fakeanony649-ops/studyminder-offline-first-student-planner)
 
 StudyMinder is a modern full-stack web application built on Cloudflare Workers. It features a responsive React frontend with Tailwind CSS styling, shadcn/ui components, and a Hono-powered API backend. Designed for rapid development and deployment, it includes theme support, error reporting, and seamless SPA handling.
 
@@ -67,7 +67,7 @@ bun deploy
 
 This builds the frontend assets and deploys the Worker. Configure your `wrangler.jsonc` for custom bindings (KV, D1, R2, DOs).
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/fakeanony649-ops/studyminder-offline-first-student-planner)
 
 For custom domains, run `wrangler deploy --name your-app` and bind via Cloudflare dashboard.
 
